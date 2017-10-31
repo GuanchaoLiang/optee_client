@@ -779,3 +779,85 @@ void TEEC_ReleaseSharedMemory(TEEC_SharedMemory *shm)
 	shm->registered_fd = -1;
 	shm->buffer_allocated = false;
 }
+
+TEEC_Result TEEC_RegisterAgent(TEEC_Context *ctx, unsigned int agent_id)
+{
+	TEEC_Result res = TEEC_SUCCESS;
+	int rc;
+
+	if (!ctx) {
+		res = TEEC_ERROR_BAD_PARAMETERS;
+		goto out;
+	}
+	rc = ioctl(ctx->fd, TEE_IOC_AGENT_REGISTER, &agent_id);
+	if (rc)
+		res = ioctl_errno_to_res(rc);
+out:
+	return res;
+}
+
+TEEC_Result TEEC_UnRegisterAgent(TEEC_Context *ctx, unsigned int agent_id)
+{
+	TEEC_Result res = TEEC_SUCCESS;
+	int rc;
+
+	if (!ctx) {
+		res = TEEC_ERROR_BAD_PARAMETERS;
+		goto out;
+	}
+	rc = ioctl(ctx->fd, TEE_IOC_AGENT_UNREGISTER, &agent_id);
+	if (rc) {
+		res = ioctl_errno_to_res(rc);
+		goto out;
+	}
+out:
+	return res;
+}
+
+TEEC_Result TEEC_AgentRecv(TEEC_Context *ctx, unsigned int agent_id,
+				void *buf, unsigned int buf_len)
+{
+	TEEC_Result res = TEEC_SUCCESS;
+	struct tee_ioctl_agent_arg arg;
+	int rc;
+
+	if (!ctx || !buf || !buf_len) {
+		res = TEEC_ERROR_BAD_PARAMETERS;
+		goto out;
+	}
+
+	arg.agent_id = agent_id;
+	arg.buf.buf_ptr = (uintptr_t)buf;
+	arg.buf.buf_len = buf_len;
+	rc = ioctl(ctx->fd, TEE_IOC_AGENT_RECV, &arg);
+	if (rc) {
+		res = ioctl_errno_to_res(rc);
+		goto out;
+	}
+out:
+	return res;
+}
+
+TEEC_Result TEEC_AgentSend(TEEC_Context *ctx, unsigned int agent_id,
+			void *buf, unsigned int buf_len)
+{
+	TEEC_Result res = TEEC_SUCCESS;
+	struct tee_ioctl_agent_arg arg;
+	int rc;
+
+	if (!ctx || !buf || !buf_len) {
+		res = TEEC_ERROR_BAD_PARAMETERS;
+		goto out;
+	}
+
+	arg.agent_id = agent_id;
+	arg.buf.buf_ptr = (uintptr_t)buf;
+	arg.buf.buf_len = buf_len;
+	rc = ioctl(ctx->fd, TEE_IOC_AGENT_SEND, &arg);
+	if (rc) {
+		res = ioctl_errno_to_res(rc);
+		goto out;
+	}
+out:
+	return res;
+}

@@ -49,6 +49,57 @@ extern "C" {
 TEEC_Result TEEC_RegisterSharedMemoryFileDescriptor(TEEC_Context *context,
 						    TEEC_SharedMemory *sharedMem,
 						    int fd);
+/**
+ * TEEC_RegisterAgent() - Register a userspace agent which handles the TEE
+ * callback, this function is not GP standard, just an extended interface.
+ *
+ * @param context     The initialized TEE context structure in which scope to
+ *                    open the session.
+ * @agent_id  Identifier of the agent
+ *
+ */
+TEEC_Result TEEC_RegisterAgent(TEEC_Context *context, unsigned int agent_id);
+
+/**
+ * TEEC_UnRegisterAgent() - UnRegister a agent in the current context, this
+ * function is not GP standard, just an extended interface.
+ *
+ * @param context     The initialized TEE context structure in which scope to
+ *                    open the session.
+ * @agent_id Identifer of the agent
+ *
+ */
+TEEC_Result TEEC_UnRegisterAgent(TEEC_Context *context, unsigned int agent_id);
+
+/**
+ * TEEC_AgentRecv() - Receive message from TEE to this agent, keep waiting until
+ * the message reaches, this function is not GP standard.
+ *
+ * @param context     The initialized TEE context structure in which scope to
+ *                    open the session.
+ * @agent_id Identifer of the agent
+ * @buf buf to hold the Received message from the TEE side, if the buffer len is
+ * shorter then the real agent buffer length, it will fail.
+ * @buf_len the real buf length sent from the TEE side.
+ *
+ */
+TEEC_Result TEEC_AgentRecv(TEEC_Context *context, unsigned int agent_id,
+			   void *buf, unsigned int buf_len);
+
+/**
+ * TEEC_AgentSend() - Send agent callback result back to TEE of this agent
+ * this function is not GP standard.
+ *
+ * @param context     The initialized TEE context structure in which scope to
+ *                    open the session.
+ * @agent_id Identifer of the agent
+ * @buf buf to hold the Received message from the TEE side, if the buffer len is
+ * longer then the real agent buffer len, it will fail.
+ * @buf_len the buf length.
+ *
+ */
+TEEC_Result TEEC_AgentSend(TEEC_Context *context, unsigned int agent_id,
+			   void *buf, unsigned int buf_len);
 
 #ifdef __cplusplus
 }
